@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import signal
 
 from pysinewave import utilities
 
@@ -70,7 +71,7 @@ class SineWaveGenerator:
         new_amplitude_array = self.new_amplitude_array(time_array)
 
         # Create the sinewave array
-        sinewave_array = new_amplitude_array * np.sin(2*np.pi*new_phase_array)
+        squarewave_array = new_amplitude_array * signal.square(2*np.pi*new_phase_array)
         
         # Update frequency and amplitude
         self.frequency = new_frequency_array[-1]
@@ -81,4 +82,4 @@ class SineWaveGenerator:
 
         #print('Frequency: {0} Phase: {1} Amplitude: {2}'.format(self.frequency, self.phase, self.amplitude))
 
-        return sinewave_array
+        return squarewave_array
