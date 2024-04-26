@@ -1,4 +1,4 @@
-# PySquareWave
+# pywaves
 
 Fork of PySineWave that generates any kind of wave, as long as they are sine, square, sawtooth, or triangle. Usage is
 basically the same as PySineWave, but with the addition of the waveform parameter.
