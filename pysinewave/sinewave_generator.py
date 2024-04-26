@@ -1,15 +1,15 @@
 import numpy as np
 from scipy import signal
-
 from pysinewave import utilities
+
 
 class SineWaveGenerator:
     '''Generates continuous sine wave data that smoothly transitions between pitches and volumes. 
     (For simplicity, use SineWave instead. 
     SineWaveGenerator is included to allow for alternative uses of generated sinewave data.)'''
 
-    def __init__(self, pitch, pitch_per_second=12, decibels=1, decibels_per_second=1, 
-                samplerate=utilities.DEFAULT_SAMPLE_RATE):
+    def __init__(self, waveform, pitch, pitch_per_second=12, decibels=1, decibels_per_second=1,
+                 samplerate=utilities.DEFAULT_SAMPLE_RATE):
         self.frequency = utilities.pitch_to_frequency(pitch)
         self.phase = 0
         self.amplitude = utilities.decibels_to_amplitude_ratio(decibels)
@@ -19,6 +19,7 @@ class SineWaveGenerator:
         self.goal_frequency = self.frequency
         self.goal_amplitude = self.amplitude
         self.samplerate = samplerate
+        self.waveform = waveform
     
     def new_frequency_array(self, time_array):
         '''Calcululate the frequency values for the next chunk of data.'''
@@ -70,8 +71,18 @@ class SineWaveGenerator:
         # Calculate the amplitudes
         new_amplitude_array = self.new_amplitude_array(time_array)
 
-        # Create the sinewave array
-        squarewave_array = new_amplitude_array * signal.square(2*np.pi*new_phase_array)
+        # Create the array based on waveform specified.
+        # 1 = sinewave, 2 = squarewave, 3 = sawtooth, 4 = triangle, * = sinewave
+        if self.waveform == 1:
+            wave_array = new_amplitude_array * np.sin(2*np.pi*new_phase_array)
+        elif self.waveform == 2:
+            wave_array = new_amplitude_array * signal.square(2 * np.pi * new_phase_array)
+        elif self.waveform == 3:
+            wave_array = new_amplitude_array * signal.sawtooth(2 * np.pi * new_phase_array)
+        elif self.waveform == 4:
+            wave_array = new_amplitude_array * signal.sawtooth(2 * np.pi * new_phase_array, 0.5)
+        else:
+            wave_array = new_amplitude_array * np.sin(2*np.pi*new_phase_array)
         
         # Update frequency and amplitude
         self.frequency = new_frequency_array[-1]
@@ -80,6 +91,4 @@ class SineWaveGenerator:
         # Update phase (getting rid of extra cycles, so we don't eventually have an overflow error)
         self.phase = new_phase_array[-1] % 1
 
-        #print('Frequency: {0} Phase: {1} Amplitude: {2}'.format(self.frequency, self.phase, self.amplitude))
-
-        return squarewave_array
+        return wave_array
